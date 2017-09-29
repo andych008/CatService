@@ -12,6 +12,10 @@ sendBroadcast(intent)  ----> onReceive
 解绑service
 ```
 
+>本例也演示了前台service的构建 
+
+
+
 ## remote service(通过aidl通信，见代码`ServiceActivity`)
 >把aidl文件放在`serverapi`包下就省去了copy，这个包下也放一些server向client开放的接口、常量
 

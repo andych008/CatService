@@ -44,7 +44,7 @@ public class MyService extends Service {
 
         // 在API11之后构建Notification的方式
         Notification.Builder builder = new Notification.Builder(this); //获取一个Notification构造器
-        Intent nfIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("www.baidu.com"));
+        Intent nfIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.baidu.com"));
 
         builder.setContentIntent(PendingIntent.getActivity(this, 0, nfIntent, 0))
                 .setLargeIcon(BitmapFactory.decodeResource(this.getResources(), R.mipmap.ic_launcher))

@@ -12,12 +12,17 @@ sendBroadcast(intent)  ----> onReceive
 解绑service
 ```
 
->本例也演示了前台service的构建 
+>既然是本地service，即在同一进程，server向client返回数据，当然也可以用handler或简简单单的一个回调函数。要选择哪一种，根据实际场景来定。
+1. 只是返回数据，不需要更新ui，可以选择回调函数。
+1. 需要更新ui，可以选择handler。
+1. 如果需要多处接收返回数据，可以选择local broadcast，当然各种event bus也行。
 
 
 
 ## remote service(通过aidl通信，见代码`ServiceActivity`)
 >把aidl文件放在`serverapi`包下就省去了copy，这个包下也放一些server向client开放的接口、常量
+
+>本例也演示了前台service的构建 
 
 
 ## IntentService的使用(见代码`IntentServiceActivity`)

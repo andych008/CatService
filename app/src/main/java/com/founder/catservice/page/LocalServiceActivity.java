@@ -8,7 +8,9 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -19,11 +21,14 @@ import com.founder.catservice.BuildConfig;
 import com.founder.catservice.R;
 import com.founder.catservice.databinding.ActivityServiceLocalBinding;
 import com.founder.catservice.service.MyLocalService;
+import com.founder.serverapi.ServerCons;
+
+import java.lang.ref.WeakReference;
 
 import hugo.weaving.DebugLog;
-import timber.log.Timber;
 
 /**
+ * LocalService的使用(binder   ----> localBroadCast或handler或回调函数)
  * onCreate 动态注册广播接收器
  * onDestroy unregisterReceiver
  *
@@ -37,6 +42,7 @@ public class LocalServiceActivity extends AppCompatActivity {
 
     private LocalBroadcastManager bManager;
     private MsgReceiver msgReceiver;
+    private Handler handler = new MyHandler(this);
     private ProgressBar progressBar;
     private TextView textView;
 
@@ -52,6 +58,14 @@ public class LocalServiceActivity extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             myBinder = (MyLocalService.MyBinder) service;
+            myBinder.setHandler(handler);
+            myBinder.setCallback(new MyLocalService.Callback() {
+                @DebugLog
+                @Override
+                public void handleMessage(int progress) {
+//                    Timber.d("Callback --- progress = %d", progress);
+                }
+            });
         }
     };
 
@@ -62,14 +76,37 @@ public class LocalServiceActivity extends AppCompatActivity {
         @DebugLog
         @Override
         public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();// 获取对应Action
-            Timber.d("action = %s", action);
             //拿到进度，更新UI
-            int progress = intent.getIntExtra("progress", 0);
-            progressBar.setProgress(progress);
-            textView.setText(String.format("%d%%", progress));
+//            int progress = intent.getIntExtra("progress", 0);
+//            Timber.d("BroadcastReceiver --- progress = %d", progress);
         }
 
+    }
+
+    private static class MyHandler extends Handler {
+        private final WeakReference<LocalServiceActivity> reference;
+
+        MyHandler(LocalServiceActivity activity) {
+            super();
+            reference = new WeakReference<>(activity);
+        }
+
+        @DebugLog
+        @Override
+        public void handleMessage(Message resultMsg) {
+            switch (resultMsg.what) {
+                case ServerCons.MSG_SUM:
+                    LocalServiceActivity activity = reference.get();
+                    if (activity != null) {
+                        //拿到进度，更新UI
+                        int progress = resultMsg.arg1;
+//                        Timber.d("Handler --- progress = %d", progress);
+                        activity.progressBar.setProgress(progress);
+                        activity.textView.setText(String.format("%d%%", progress));
+                    }
+                    break;
+            }
+        }
     }
 
     @Override
